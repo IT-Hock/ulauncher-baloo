@@ -21,10 +21,20 @@ logger = logging.getLogger(__name__)
 icon_theme = Gtk.IconTheme.get_default()
 
 document_open_icon = icon_theme.lookup_icon('document-open', 48, 0).get_filename()
-document_duplicate_icon = icon_theme.lookup_icon('document-duplicate', 48, 0).get_filename()
 terminal_icon = icon_theme.lookup_icon('utilities-terminal', 48, 0).get_filename()
 gnome_saved_search_icon = icon_theme.lookup_icon('application-x-gnome-saved-search', 48, 0).get_filename()
-folder_important_icon = icon_theme.lookup_icon('folder-important', 48, 0).get_filename()
+
+if icon_theme.has_icon('document-duplicate'):
+    document_duplicate_icon = icon_theme.lookup_icon('document-duplicate', 48, 0).get_filename()
+else:
+    logger.error('Icon document-duplicate not found')
+    document_duplicate_icon = icon_theme.lookup_icon('edit-copy', 48, 0).get_filename()
+
+if icon_theme.has_icon('folder-important'):
+    folder_important_icon = icon_theme.lookup_icon('folder-important', 48, 0).get_filename()
+else:
+    logger.error('Icon folder-important not found')
+    folder_important_icon = icon_theme.lookup_icon('important', 48, 0).get_filename()
 
 def get_icon_filename(filename,size):
     
@@ -46,7 +56,11 @@ def get_icon_filename(filename,size):
 
 def get_default_terminal():
     terminal = 'gnome-terminal'
-    if os.path.exists('/usr/bin/alacritty'):
+    if os.path.exists('/usr/bin/warp-terminal'):
+        terminal = 'warp-terminal'
+    elif os.path.exists('/usr/bin/kitty'):
+        terminal = 'kitty'
+    elif os.path.exists('/usr/bin/alacritty'):
         terminal = 'alacritty'
     elif os.path.exists('/usr/bin/konsole'):
         terminal = 'konsole'
@@ -102,7 +116,7 @@ class KeywordQueryEventListener(EventListener):
                                                                name='bs <query>',
                                                                on_enter=HideWindowAction())])
         # Get the results from baloo search
-        result = subprocess.run(['baloosearch6', '-l', '15', event.get_argument()], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        result = subprocess.run(['baloosearch', '-l', '15', event.get_argument()], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         results = result.stdout.decode('utf-8').split('\n')
         for i, result in enumerate(results[:9] if len(results) > 10 else results[:10]):
             if not result:
