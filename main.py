@@ -21,10 +21,20 @@ logger = logging.getLogger(__name__)
 icon_theme = Gtk.IconTheme.get_default()
 
 document_open_icon = icon_theme.lookup_icon('document-open', 48, 0).get_filename()
-document_duplicate_icon = icon_theme.lookup_icon('document-duplicate', 48, 0).get_filename()
 terminal_icon = icon_theme.lookup_icon('utilities-terminal', 48, 0).get_filename()
 gnome_saved_search_icon = icon_theme.lookup_icon('application-x-gnome-saved-search', 48, 0).get_filename()
-folder_important_icon = icon_theme.lookup_icon('folder-important', 48, 0).get_filename()
+
+if icon_theme.has_icon('document-duplicate'):
+    document_duplicate_icon = icon_theme.lookup_icon('document-duplicate', 48, 0).get_filename()
+else:
+    logger.error('Icon document-duplicate not found')
+    document_duplicate_icon = icon_theme.lookup_icon('edit-copy', 48, 0).get_filename()
+
+if icon_theme.has_icon('folder-important'):
+    folder_important_icon = icon_theme.lookup_icon('folder-important', 48, 0).get_filename()
+else:
+    logger.error('Icon folder-important not found')
+    folder_important_icon = icon_theme.lookup_icon('important', 48, 0).get_filename()
 
 def get_icon_filename(filename,size):
     
