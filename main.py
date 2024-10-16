@@ -56,7 +56,11 @@ def get_icon_filename(filename,size):
 
 def get_default_terminal():
     terminal = 'gnome-terminal'
-    if os.path.exists('/usr/bin/alacritty'):
+    if os.path.exists('/usr/bin/warp-terminal'):
+        terminal = 'warp-terminal'
+    elif os.path.exists('/usr/bin/kitty'):
+        terminal = 'kitty'
+    elif os.path.exists('/usr/bin/alacritty'):
         terminal = 'alacritty'
     elif os.path.exists('/usr/bin/konsole'):
         terminal = 'konsole'
