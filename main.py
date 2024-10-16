@@ -112,7 +112,7 @@ class KeywordQueryEventListener(EventListener):
                                                                name='bs <query>',
                                                                on_enter=HideWindowAction())])
         # Get the results from baloo search
-        result = subprocess.run(['baloosearch6', '-l', '15', event.get_argument()], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        result = subprocess.run(['baloosearch', '-l', '15', event.get_argument()], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         results = result.stdout.decode('utf-8').split('\n')
         for i, result in enumerate(results[:9] if len(results) > 10 else results[:10]):
             if not result:
