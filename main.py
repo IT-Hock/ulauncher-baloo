@@ -46,17 +46,16 @@ terminal_icon = try_lookup_icon('utilities-terminal', 48, 0)
 gnome_saved_search_icon = try_lookup_icon('application-x-gnome-saved-search', 48, 0)
 document_duplicate_icon = try_lookup_icon('document-duplicate', 48, 0, 'edit-copy')
 folder_important_icon = try_lookup_icon('document-duplicate', 48, 0, 'important')
+executable_icon = try_lookup_icon('application-x-executable', 48, 0)
 
 def get_icon_filename(filename,size):
 
-    final_filename = "images/icon.png"
+    final_filename = executable_icon
     if os.path.exists(filename):
         file = Gio.File.new_for_path(filename)
         info = file.query_info('standard::icon' , 0 , Gio.Cancellable())
         icon = info.get_icon().get_names()[0]
         final_filename = try_lookup_icon(icon, size, 0, 'application-x-executable')
-    else:
-        final_filename = try_lookup_icon('application-x-executable', size, 0)
     return final_filename
         
 def FileActionResults(extension, file):
