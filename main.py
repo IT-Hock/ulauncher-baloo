@@ -33,12 +33,12 @@ def try_lookup_icon(iconname, size, flags, fallback=None):
     if icon_theme.has_icon(iconname):
         return icon_theme.lookup_icon(iconname, size, flags).get_filename()
     else:
-        logger.error(f'Icon "{iconname}" not found')
+        logger.debug(f'Icon "{iconname}" not found')
         return None
     if icon_theme.has_icon(fallback):
         return icon_theme.lookup_icon(fallback, size, flags).get_filename()
     else:
-        logger.error(f'Fallback icon "{fallback}" not found')
+        logger.debug(f'Fallback icon "{fallback}" not found')
         return None
 
 document_open_icon = try_lookup_icon('document-open', 48, 0)
