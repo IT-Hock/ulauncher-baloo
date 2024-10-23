@@ -81,7 +81,7 @@ def FileActionResults(extension, file):
             ExtensionResultItem(
                 icon=terminal_icon,
                 name='Open terminal here',
-                on_enter=RunScriptAction(extension.get_open_in_terminal_script(file), file)
+                on_enter=extension.get_open_in_terminal_script(file)
             )
         ]
 
