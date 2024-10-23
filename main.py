@@ -54,31 +54,31 @@ def get_icon_filename(filename,size):
     
     return final_filename
 
+# TODO: Use preferences to let the user decide
 def get_default_terminal():
-    terminal = 'gnome-terminal'
     if os.path.exists('/usr/bin/warp-terminal'):
-        terminal = 'warp-terminal'
+        return 'warp-terminal'
     elif os.path.exists('/usr/bin/kitty'):
-        terminal = 'kitty'
+        return 'kitty'
     elif os.path.exists('/usr/bin/alacritty'):
-        terminal = 'alacritty'
+        return 'alacritty'
     elif os.path.exists('/usr/bin/konsole'):
-        terminal = 'konsole'
+        return 'konsole'
     elif os.path.exists('/usr/bin/xfce4-terminal'):
-        terminal = 'xfce4-terminal'
+        return 'xfce4-terminal'
     elif os.path.exists('/usr/bin/terminator'):
-        terminal = 'terminator'
+        return 'terminator'
     elif os.path.exists('/usr/bin/tilix'):
-        terminal = 'tilix'
+        return 'tilix'
     elif os.path.exists('/usr/bin/urxvt'):
-        terminal = 'urxvt'
+        return 'urxvt'
     elif os.path.exists('/usr/bin/roxterm'):
-        terminal = 'roxterm'
+        return 'roxterm'
     elif os.path.exists('/usr/bin/lxterminal'):
-        terminal = 'lxterminal'
+        return 'lxterminal'
     elif os.path.exists('/usr/bin/st'):
-        terminal = 'st'
-    return terminal
+        return 'st'
+    return 'gnome-terminal'
         
 def FileActionResults(file):
     logger.info('Actions for file %s' % file)
