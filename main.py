@@ -28,38 +28,35 @@ from gi.repository import Gio, Gtk # type: ignore
 logger = logging.getLogger(__name__)
 icon_theme = Gtk.IconTheme.get_default()
 
-document_open_icon = icon_theme.lookup_icon('document-open', 48, 0).get_filename()
-terminal_icon = icon_theme.lookup_icon('utilities-terminal', 48, 0).get_filename()
-gnome_saved_search_icon = icon_theme.lookup_icon('application-x-gnome-saved-search', 48, 0).get_filename()
 
-if icon_theme.has_icon('document-duplicate'):
-    document_duplicate_icon = icon_theme.lookup_icon('document-duplicate', 48, 0).get_filename()
-else:
-    logger.error('Icon document-duplicate not found')
-    document_duplicate_icon = icon_theme.lookup_icon('edit-copy', 48, 0).get_filename()
+def try_lookup_icon(iconname, size, flags, fallback=None):
+    if icon_theme.has_icon(iconname):
+        return icon_theme.lookup_icon(iconname, size, flags).get_filename()
+    else:
+        logger.debug(f'Icon "{iconname}" not found')
+        return None
+    if icon_theme.has_icon(fallback):
+        return icon_theme.lookup_icon(fallback, size, flags).get_filename()
+    else:
+        logger.debug(f'Fallback icon "{fallback}" not found')
+        return None
 
-if icon_theme.has_icon('folder-important'):
-    folder_important_icon = icon_theme.lookup_icon('folder-important', 48, 0).get_filename()
-else:
-    logger.error('Icon folder-important not found')
-    folder_important_icon = icon_theme.lookup_icon('important', 48, 0).get_filename()
+document_open_icon = try_lookup_icon('document-open', 48, 0)
+terminal_icon = try_lookup_icon('utilities-terminal', 48, 0)
+gnome_saved_search_icon = try_lookup_icon('application-x-gnome-saved-search', 48, 0)
+document_duplicate_icon = try_lookup_icon('document-duplicate', 48, 0, 'edit-copy')
+folder_important_icon = try_lookup_icon('document-duplicate', 48, 0, 'important')
 
 def get_icon_filename(filename,size):
-    
+
     final_filename = "images/icon.png"
     if os.path.exists(filename):
         file = Gio.File.new_for_path(filename)
         info = file.query_info('standard::icon' , 0 , Gio.Cancellable())
         icon = info.get_icon().get_names()[0]
-
-        icon_file = icon_theme.lookup_icon(icon , size , 0)
-        if icon_file != None:
-            final_filename = icon_file.get_filename()
-        else:
-            final_filename = icon_theme.lookup_icon('application-x-executable' , size , 0).get_filename()
+        final_filename = try_lookup_icon(icon, size, 0, 'application-x-executable')
     else:
-        final_filename = icon_theme.lookup_icon('application-x-executable' , size , 0).get_filename()
-    
+        final_filename = try_lookup_icon('application-x-executable', size, 0)
     return final_filename
         
 def FileActionResults(extension, file):
@@ -78,7 +75,7 @@ def FileActionResults(extension, file):
             ExtensionResultItem(
                 icon=terminal_icon,
                 name='Open terminal here',
-                on_enter=RunScriptAction(extension.get_open_in_terminal_script(file), file)
+                on_enter=extension.get_open_in_terminal_script(file)
             )
         ]
 
