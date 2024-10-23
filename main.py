@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 icon_theme = Gtk.IconTheme.get_default()
 
 
-def try_lookup_item(iconname, size, flags, fallback=None):
+def try_lookup_icon(iconname, size, flags, fallback=None):
     if icon_theme.has_icon(iconname):
         return icon_theme.lookup_icon(iconname, size, flags).get_filename()
     else:
@@ -41,11 +41,11 @@ def try_lookup_item(iconname, size, flags, fallback=None):
         logger.error(f'Fallback icon "{fallback}" not found')
         return None
 
-document_open_icon = try_lookup_item('document-open', 48, 0)
-terminal_icon = try_lookup_item('utilities-terminal', 48, 0)
-gnome_saved_search_icon = try_lookup_item('application-x-gnome-saved-search', 48, 0)
-document_duplicate_icon = try_lookup_item('document-duplicate', 48, 0, 'edit-copy')
-folder_important_icon = try_lookup_item('document-duplicate', 48, 0, 'important')
+document_open_icon = try_lookup_icon('document-open', 48, 0)
+terminal_icon = try_lookup_icon('utilities-terminal', 48, 0)
+gnome_saved_search_icon = try_lookup_icon('application-x-gnome-saved-search', 48, 0)
+document_duplicate_icon = try_lookup_icon('document-duplicate', 48, 0, 'edit-copy')
+folder_important_icon = try_lookup_icon('document-duplicate', 48, 0, 'important')
 
 def get_icon_filename(filename,size):
 
@@ -54,15 +54,9 @@ def get_icon_filename(filename,size):
         file = Gio.File.new_for_path(filename)
         info = file.query_info('standard::icon' , 0 , Gio.Cancellable())
         icon = info.get_icon().get_names()[0]
-
-        icon_file = icon_theme.lookup_icon(icon , size , 0)
-        if icon_file != None:
-            final_filename = icon_file.get_filename()
-        else:
-            final_filename = icon_theme.lookup_icon('application-x-executable' , size , 0).get_filename()
+        final_filename = try_lookup_icon(icon, size, 0, 'application-x-executable')
     else:
-        final_filename = icon_theme.lookup_icon('application-x-executable' , size , 0).get_filename()
-    
+        final_filename = try_lookup_icon('application-x-executable', size, 0)
     return final_filename
         
 def FileActionResults(extension, file):
