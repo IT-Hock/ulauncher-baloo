@@ -13,6 +13,34 @@
       "type": "keyword",
       "name": "Baloo search",
       "default_value": "bs"
+    },
+    {
+      "id": "terminal_emulator",
+      "type": "select",
+      "name": "Terminal Emulator",
+      "description": "Sets the terminal emulator to open directories directly in the terminal",
+      "default_value": "gnome-terminal",
+      "options": [
+        "warp-terminal",
+        "kitty",
+        "alacritty",
+        "konsole",
+        "xfce4-terminal",
+        "terminator",
+        "tilix",
+        "urxvt",
+        "roxterm",
+        "lxterminal",
+        "st",
+        "gnome-terminal"
+      ]
+    },
+    {
+      "id": "baloo_executable",
+      "type": "input",
+      "name": "Baloo executable",
+      "description": "Sets the executable to use for Baloo indexing. Leave empty to try to auto-detect.",
+      "default_value": ""
     }
   ]
 }

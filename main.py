@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import subprocess
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
@@ -8,14 +9,21 @@ from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
+from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
+from ulauncher.api.client.Extension import Extension
+from ulauncher.api.client.EventListener import EventListener
+from ulauncher.api.shared.event import KeywordQueryEvent
+from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+from ulauncher.api.shared.item.ExtensionSmallResultItem import ExtensionSmallResultItem
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 
 import os , gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gio, Gtk
+from gi.repository import Gio, Gtk # type: ignore
 
 logger = logging.getLogger(__name__)
 icon_theme = Gtk.IconTheme.get_default()
@@ -53,34 +61,8 @@ def get_icon_filename(filename,size):
         final_filename = icon_theme.lookup_icon('application-x-executable' , size , 0).get_filename()
     
     return final_filename
-
-# TODO: Use preferences to let the user decide
-def get_default_terminal():
-    if os.path.exists('/usr/bin/warp-terminal'):
-        return 'warp-terminal'
-    elif os.path.exists('/usr/bin/kitty'):
-        return 'kitty'
-    elif os.path.exists('/usr/bin/alacritty'):
-        return 'alacritty'
-    elif os.path.exists('/usr/bin/konsole'):
-        return 'konsole'
-    elif os.path.exists('/usr/bin/xfce4-terminal'):
-        return 'xfce4-terminal'
-    elif os.path.exists('/usr/bin/terminator'):
-        return 'terminator'
-    elif os.path.exists('/usr/bin/tilix'):
-        return 'tilix'
-    elif os.path.exists('/usr/bin/urxvt'):
-        return 'urxvt'
-    elif os.path.exists('/usr/bin/roxterm'):
-        return 'roxterm'
-    elif os.path.exists('/usr/bin/lxterminal'):
-        return 'lxterminal'
-    elif os.path.exists('/usr/bin/st'):
-        return 'st'
-    return 'gnome-terminal'
         
-def FileActionResults(file):
+def FileActionResults(extension, file):
     logger.info('Actions for file %s' % file)
     return [
             ExtensionResultItem(
@@ -96,7 +78,7 @@ def FileActionResults(file):
             ExtensionResultItem(
                 icon=terminal_icon,
                 name='Open terminal here',
-                on_enter=RunScriptAction(get_default_terminal(), file)
+                on_enter=RunScriptAction(extension.get_open_in_terminal_script(file), file)
             )
         ]
 
@@ -106,6 +88,25 @@ class BalooIndexExtension(Extension):
         super(BalooIndexExtension, self).__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(ItemEnterEvent, ItemEnterEventListener())
+        
+    def get_open_in_terminal_script(self, path):
+        """ Returns the script based on the type of terminal """
+        terminal_emulator = self.preferences['terminal_emulator']
+        return RunScriptAction(terminal_emulator,
+                                   ['--working-directory', path])
+    
+    def get_baloo_executable(self):
+        executable = self.preferences['baloo_executable']
+        if executable and not shutil.which(executable):
+            logger.error('Executable not found: %s' % executable)
+        if not executable or not shutil.which(executable):
+            # try different names like baloosearch, baloosearch5, baloosearch6
+            executable_names = ['baloosearch', 'baloosearch5', 'baloosearch6']
+            for name in executable_names:
+                if shutil.which(name):
+                    executable = name
+                    break
+        return executable
 
 class KeywordQueryEventListener(EventListener):
 
@@ -116,7 +117,8 @@ class KeywordQueryEventListener(EventListener):
                                                                name='bs <query>',
                                                                on_enter=HideWindowAction())])
         # Get the results from baloo search
-        result = subprocess.run(['baloosearch', '-l', '15', event.get_argument()], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        executable_name = extension.get_baloo_executable()
+        result = subprocess.run([executable_name, '-l', '15', event.get_argument()], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         results = result.stdout.decode('utf-8').split('\n')
         for i, result in enumerate(results[:9] if len(results) > 10 else results[:10]):
             if not result:
@@ -131,7 +133,7 @@ class KeywordQueryEventListener(EventListener):
             items.append(ExtensionResultItem(icon=icon,
                                                 name=name,
                                                 description=description,
-                                                on_enter=RenderResultListAction(FileActionResults(result))))
+                                                on_enter=RenderResultListAction(FileActionResults(extension, result))))
 
         # If no results found show a message
         if not items:
