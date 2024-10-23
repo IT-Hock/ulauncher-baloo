@@ -89,7 +89,7 @@ class BalooIndexExtension(Extension):
         """ Returns the script based on the type of terminal """
         terminal_emulator = self.preferences['terminal_emulator']
         return RunScriptAction(terminal_emulator,
-                                   ['--working-directory', path])
+                                   [path, '--working-directory', path])
     
     def get_baloo_executable(self):
         executable = self.preferences['baloo_executable']
