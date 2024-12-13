@@ -2,7 +2,7 @@
   "required_api_version": "^2.0.0",
   "name": "Baloo File Search",
   "description": "Search files using Baloo",
-  "developer_name": "Dominic Hock (d.hock@it-hock.de)",
+  "developer_name": "Dominic Hock (d.hock@it-hock.de), Lxtharia",
   "icon": "images/icon.png",
   "options": {
     "query_debounce": 0.05
@@ -41,6 +41,13 @@
       "name": "Baloo executable",
       "description": "Sets the executable to use for Baloo indexing. Leave empty to try to auto-detect.",
       "default_value": ""
+    },
+    {
+      "id": "max_results",
+      "type": "input",
+      "name": "Max results to be shown",
+      "description": "Sets how many results should be shown.",
+      "default_value": "20"
     }
   ]
 }
