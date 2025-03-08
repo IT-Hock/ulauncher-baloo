@@ -107,16 +107,18 @@ class BalooIndexExtension(Extension):
 class KeywordQueryEventListener(EventListener):
 
     def on_event(self, event, extension):
+
         items = []
         if not event.get_argument():
             return RenderResultListAction([ExtensionResultItem(icon='images/icon.png',
                                                                name='bs <query>',
                                                                on_enter=HideWindowAction())])
         # Get the results from baloo search
+        max_results = int(extension.preferences["max_results"])
         executable_name = extension.get_baloo_executable()
-        result = subprocess.run([executable_name, '-l', '15', event.get_argument()], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        result = subprocess.run([executable_name, '-l', '30', event.get_argument()], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         results = result.stdout.decode('utf-8').split('\n')
-        for i, result in enumerate(results[:9] if len(results) > 10 else results[:10]):
+        for i, result in enumerate(results[:max_results-1] if len(results) > max_results else results[:max_results]):
             if not result:
                 continue
             
@@ -136,7 +138,7 @@ class KeywordQueryEventListener(EventListener):
             items.append(ExtensionResultItem(icon=gnome_saved_search_icon,
                                              name='No results found',
                                              on_enter=HideWindowAction()))
-        if len(results) > 10:
+        if len(results) > max_results:
             items.append(ExtensionResultItem(icon=gnome_saved_search_icon,
                                              name='Please refine your search',
                                              description='Too many results'))
