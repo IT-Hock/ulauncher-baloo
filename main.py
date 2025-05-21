@@ -109,6 +109,10 @@ class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
 
         items = []
+        file_results = []
+
+        folder_results = []
+
         if not event.get_argument():
             return RenderResultListAction([ExtensionResultItem(icon='images/icon.png',
                                                                name='bs <query>',
@@ -116,22 +120,43 @@ class KeywordQueryEventListener(EventListener):
         # Get the results from baloo search
         max_results = int(extension.preferences["max_results"])
         executable_name = extension.get_baloo_executable()
+
         result = subprocess.run([executable_name, '-l', '30', event.get_argument()], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         results = result.stdout.decode('utf-8').split('\n')
+
+
         for i, result in enumerate(results[:max_results-1] if len(results) > max_results else results[:max_results]):
             if not result:
                 continue
             
             icon = get_icon_filename(result, 48)
             name = result.split('/')[-1]
+
             description = result
             if not os.path.exists(result):
                 icon = folder_important_icon
                 logger.error('File not found: %s' % result)
-            items.append(ExtensionResultItem(icon=icon,
+
+            if(os.path.isfile(result)):
+                
+                file_results.append(ExtensionResultItem(icon=icon,
                                                 name=name,
                                                 description=description,
                                                 on_enter=RenderResultListAction(FileActionResults(extension, result))))
+                
+            elif(os.path.isdir(result)):
+                
+                folder_results.append(ExtensionResultItem(icon=icon,
+                                name=name,
+                                description=description,
+                                on_enter=RenderResultListAction(FileActionResults(extension, result))))
+                
+            items.append(ExtensionResultItem(icon=icon,
+                                name=name,
+                                description=description,
+                                on_enter=RenderResultListAction(FileActionResults(extension, result))))
+
+            
 
         # If no results found show a message
         if not items:
@@ -142,6 +167,13 @@ class KeywordQueryEventListener(EventListener):
             items.append(ExtensionResultItem(icon=gnome_saved_search_icon,
                                              name='Please refine your search',
                                              description='Too many results'))
+
+
+        if(extension.preferences["results_order"] == "Folders First"):
+            items = folder_results + file_results
+        elif(extension.preferences["results_order"] == "Files First"):
+            items = file_results + folder_results
+        
 
         return RenderResultListAction(items)
 

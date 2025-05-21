@@ -48,6 +48,18 @@
       "name": "Max results to be shown",
       "description": "Sets how many results should be shown.",
       "default_value": "20"
+    },
+    {
+      "id": "results_order",
+      "type": "select",
+      "name": "Order of Results",
+      "description": "Sets the order in which results are displayed.",
+      "default_value": "Folders First",
+      "options": [
+        "Folders First",
+        "Files First",
+        "No Order"
+      ]
     }
   ]
 }
